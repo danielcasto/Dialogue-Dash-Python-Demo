@@ -1,3 +1,4 @@
+import pyaudio
 import speech_recognition as speech
 from wit import Wit
 import sys
