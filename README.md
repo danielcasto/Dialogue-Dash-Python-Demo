@@ -8,3 +8,4 @@
 ## Python Modules Used:
 - Wit
 - SpeechRecognition
+- PyAudio
