@@ -9,3 +9,6 @@
 - Wit
 - SpeechRecognition
 - PyAudio
+
+## Instructions:
+To run, go into repo directory and enter in terminal: "python3 main.py <access_token_here>"
