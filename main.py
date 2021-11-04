@@ -11,7 +11,7 @@ def get_intents(response):
 
 	for intent in response['intents']:
 		intents.append(intent['name'])
-		
+
 	return intents
 
 
@@ -35,7 +35,7 @@ def main():
 	audio = None
 	
 	with speech.Microphone() as mic:
-		print('Speak now')
+		print('\n----- Speak now -----\n')
 		recognizer.adjust_for_ambient_noise(mic)
 		audio = recognizer.listen(mic)
 
@@ -44,11 +44,16 @@ def main():
 	google_understanding = recognizer.recognize_google(audio)
 	response = client.message(google_understanding)
 
-	print('Google heard: ', google_understanding, '\n')
-	print('Wit\'s resopnse: ', response)
-	print('Intent(s): ', get_intents(response))
-	print('Entities(s): ', get_entities_values(response))
+	print('Google heard, \'', google_understanding, '\'\n', sep='')
 
+	user_input = input('Print raw data from wit? Enter \'Y\' for yes, anything else for no')
+
+	if user_input == 'Y':
+		print('\nWit\'s response: ', response,)
+
+	print('\nIntent(s): ', get_intents(response))
+	print('Entities(s): ', get_entities_values(response))
+	# TODO add traits as well
 
 if __name__ == '__main__':
 	main()
