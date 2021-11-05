@@ -26,6 +26,17 @@ def get_entities_values(response):
 	return entities_values
 
 
+def get_traits(response):
+	traits = []
+
+	for trait in response['traits']:
+		for item in response['traits'][trait]:
+			pair = (trait, item['value'])
+			traits.append(pair)
+
+	return traits
+
+
 def main():
 
 	if len(sys.argv) != 2:
@@ -38,7 +49,7 @@ def main():
 	recognizer = speech.Recognizer()
 	audio = None
 	
-	print('Options: ','\t1. Record audio file and send to wit',
+	print('\n\nOptions: ','\t1. Record audio file and send to wit',
 		'\t2. Use google speech recognition and send send resulting string to wit', sep='\n', end='\n')
 	
 	user_input = input()
@@ -48,6 +59,7 @@ def main():
 		frequency = 44100
 		duration = 10
 		
+		print('\n----- Speak now -----\n')
 		audio_arr = sd.rec(int(duration*frequency), samplerate=frequency, channels=2)
 		sd.wait()
 
@@ -55,7 +67,6 @@ def main():
 
 		with open('voice_recording.wav', 'rb') as file:
 			response = client.speech(file, {'Content-Type': 'audio/wav'})
-			print(str(response))
 	elif user_input == '2':
 		with speech.Microphone() as mic:
 			print('\n----- Speak now -----\n')
@@ -72,14 +83,14 @@ def main():
 
 	
 
-	user_input = input('Print raw data from wit? Enter \'Y\' for yes, anything else for no')
+	user_input = input('Print raw data from wit? Enter \'Y\' for yes, anything else for no: ')
 
 	if user_input == 'Y':
 		print('\nWit\'s response: ', response,)
 
 	print('\nIntent(s): ', get_intents(response))
 	print('Entities(s): ', get_entities_values(response))
-	# TODO add traits as well
+	print('Trait(s): ', get_traits(response))
 
 if __name__ == '__main__':
 	main()
