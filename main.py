@@ -1,7 +1,8 @@
 from os import access
-import json
 import pyaudio
 import speech_recognition as speech
+import sounddevice as sd
+import wavio
 from wit import Wit
 import sys
 
@@ -31,20 +32,45 @@ def main():
 		print('Error: you entered the wrong amount of sys args')
 		exit(1)
 	
+	ACCESS_CODE = sys.argv[1]
+	client = Wit(ACCESS_CODE)
+	response = None
 	recognizer = speech.Recognizer()
 	audio = None
 	
-	with speech.Microphone() as mic:
-		print('\n----- Speak now -----\n')
-		recognizer.adjust_for_ambient_noise(mic)
-		audio = recognizer.listen(mic)
+	print('Options: ','\t1. Record audio file and send to wit',
+		'\t2. Use google speech recognition and send send resulting string to wit', sep='\n', end='\n')
+	
+	user_input = input()
 
-	ACCESS_CODE = sys.argv[1]
-	client = Wit(ACCESS_CODE)
-	google_understanding = recognizer.recognize_google(audio)
-	response = client.message(google_understanding)
+	if user_input == '1':
+		print()
+		frequency = 44100
+		duration = 10
+		
+		audio_arr = sd.rec(int(duration*frequency), samplerate=frequency, channels=2)
+		sd.wait()
 
-	print('Google heard, \'', google_understanding, '\'\n', sep='')
+		wavio.write('voice_recording.wav', audio_arr, frequency, sampwidth=2)
+
+		with open('voice_recording.wav', 'rb') as file:
+			response = client.speech(file, {'Content-Type': 'audio/wav'})
+			print(str(response))
+	elif user_input == '2':
+		with speech.Microphone() as mic:
+			print('\n----- Speak now -----\n')
+			recognizer.adjust_for_ambient_noise(mic)
+			audio = recognizer.listen(mic)
+
+		google_understanding = recognizer.recognize_google(audio)
+		response = client.message(google_understanding)
+
+		print('Google heard, \'', google_understanding, '\'\n', sep='')
+	else:
+		print('Error: that wasn\'t one of the options')
+		return
+
+	
 
 	user_input = input('Print raw data from wit? Enter \'Y\' for yes, anything else for no')
 
